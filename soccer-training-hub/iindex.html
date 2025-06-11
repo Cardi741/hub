@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            padding-bottom: 60px; /* Spazio per il pulsante fisso */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+        
+        .exercises-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .exercises-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Forza 3 colonne */
+    gap: 15px;
+    max-width: 100%;
+}
+        
+        /* Stile per la categorizzazione degli esercizi */
+        .category-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3498db;
+            margin: 15px 0 5px;
+            grid-column: 1 / -1;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        
+        .exercise-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .exercise-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .exercise-name {
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* Nuovo stile per il pulsante fisso */
+        .more-btn {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+        }
+        
+        .more-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        /* Stile per la freccia */
+        .arrow {
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid white;
+    transition: transform 0.3s ease;
+}
+        
+.arrow.down {
+    transform: rotate(180deg);
+}
+        
+        .more-exercises {
+            display: none;
+        }
+        
+        .workout-builder {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .workout-settings {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.countdown-setting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.countdown-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.countdown-input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+        
+        .workout-title {
+            color: #333;
+            text-align: center;
+        }
+        
+        .workout-list {
+            list-style-type: none;
+            padding: 0;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+        .workout-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            position: relative;
+        }
+        
+        .workout-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .workout-item-name {
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        
+        .remove-exercise {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .remove-exercise:hover {
+            background-color: #c0392b;
+        }
+        
+        .workout-item-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .time-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .time-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .time-input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        .start-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            margin-top: auto;
+        }
+        
+        .start-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .start-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .timer-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .timer-display {
+            font-size: 72px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .timer-exercise {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .timer-status {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .timer-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .timer-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .next-up {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .mobile-warning {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fcf8e3;
+            border: 1px solid #faebcc;
+            border-radius: 5px;
+            color: #8a6d3b;
+        }
+        
+        @media (max-width: 767px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .exercises-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .timer-display {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Workout Tracker</h1>
+    
+    <div class="container">
+        <div class="exercises-container">
+            <div class="exercises-grid">
+                <div class="exercise-card" data-exercise="Push-up">
+                    <img src="img/push-up.png" alt="Push-up" class="exercise-img">
+                    <div class="exercise-name">Push-up</div>
+                </div>
+                <div class="exercise-card" data-exercise="Squat">
+                    <img src="img/squat.png" alt="Squat" class="exercise-img">
+                    <div class="exercise-name">Squat</div>
+                </div>
+                <div class="exercise-card" data-exercise="Plank">
+                    <img src="img/plank.png" alt="Plank" class="exercise-img">
+                    <div class="exercise-name">Plank</div>
+                </div>
+                <div class="exercise-card" data-exercise="Lunge">
+                    <img src="img/lunge.png" alt="Lunge" class="exercise-img">
+                    <div class="exercise-name">Lunge</div>
+                </div>
+                <div class="exercise-card" data-exercise="Mountain Climber">
+                    <img src="img/mountain-climber.png" alt="Mountain Climber" class="exercise-img">
+                    <div class="exercise-name">Mountain Climber</div>
+                </div>
+                <div class="exercise-card" data-exercise="Burpee">
+                    <img src="img/burpee.png" alt="Burpee" class="exercise-img">
+                    <div class="exercise-name">Burpee</div>
+                </div>
+                <div class="exercise-card" data-exercise="Crunch">
+                    <img src="img/crunch.png" alt="Crunch" class="exercise-img">
+                    <div class="exercise-name">Crunch</div>
+                </div>
+                <div class="exercise-card" data-exercise="Jumping Jack">
+                    <img src="img/jumping-jack.png" alt="Jumping Jack" class="exercise-img">
+                    <div class="exercise-name">Jumping Jack</div>
+                </div>
+            </div>
+
+            <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
+    <button onclick="window.location.href='hub.html'" 
+            style="background: linear-gradient(45deg, #32CD32, #228B22); 
+                   color: white; border: none; padding: 10px 15px; 
+                   border-radius: 25px; cursor: pointer; font-weight: bold;
+                   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                   transition: all 0.3s ease;">
+        ⚽ HUB
+    </button>
+</div>
+            
+            <div class="more-exercises">
+                <div class="exercises-grid">
+                    <!-- Esercizi Bodyweight -->
+                    <div class="exercise-card" data-exercise="Pull-up">
+                        <img src="img/pull-up.png" alt="Pull-up" class="exercise-img">
+                        <div class="exercise-name">Pull-up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Chin-up">
+                        <img src="img/chin-up.png" alt="Chin-up" class="exercise-img">
+                        <div class="exercise-name">Chin-up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Dip">
+                        <img src="img/dip.png" alt="Dip" class="exercise-img">
+                        <div class="exercise-name">Dip</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Russian Twist">
+                        <img src="img/russian-twist.png" alt="Russian Twist" class="exercise-img">
+                        <div class="exercise-name">Russian Twist</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Leg Raise">
+                        <img src="img/leg-raise.png" alt="Leg Raise" class="exercise-img">
+                        <div class="exercise-name">Leg Raise</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Side Plank">
+                        <img src="img/side-plank.png" alt="Side Plank" class="exercise-img">
+                        <div class="exercise-name">Side Plank</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Diamond Push-up">
+                        <img src="img/diamond-push-up.png" alt="Diamond Push-up" class="exercise-img">
+                        <div class="exercise-name">Diamond Push-up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Pike Push-up">
+                        <img src="img/pike-push-up.png" alt="Pike Push-up" class="exercise-img">
+                        <div class="exercise-name">Pike Push-up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Decline Push-up">
+                        <img src="img/decline-push-up.png" alt="Decline Push-up" class="exercise-img">
+                        <div class="exercise-name">Decline Push-up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Pistol Squat">
+                        <img src="img/pistol-squat.png" alt="Pistol Squat" class="exercise-img">
+                        <div class="exercise-name">Pistol Squat</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Wall Sit">
+                        <img src="img/wall-sit.png" alt="Wall Sit" class="exercise-img">
+                        <div class="exercise-name">Wall Sit</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Superman">
+                        <img src="img/superman.png" alt="Superman" class="exercise-img">
+                        <div class="exercise-name">Superman</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Glute Bridge">
+                        <img src="img/glute-bridge.png" alt="Glute Bridge" class="exercise-img">
+                        <div class="exercise-name">Glute Bridge</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Bicycle Crunch">
+                        <img src="img/bicycle-crunch.png" alt="Bicycle Crunch" class="exercise-img">
+                        <div class="exercise-name">Bicycle Crunch</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Bird Dog">
+                        <img src="img/bird-dog.png" alt="Bird Dog" class="exercise-img">
+                        <div class="exercise-name">Bird Dog</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Dragon Flag">
+                        <img src="img/dragon-flag.png" alt="Dragon Flag" class="exercise-img">
+                        <div class="exercise-name">Dragon Flag</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Hollow Hold">
+                        <img src="img/hollow-hold.png" alt="Hollow Hold" class="exercise-img">
+                        <div class="exercise-name">Hollow Hold</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="L-Sit">
+                        <img src="img/l-sit.png" alt="L-Sit" class="exercise-img">
+                        <div class="exercise-name">L-Sit</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Handstand Hold">
+                        <img src="img/handstand-hold.png" alt="Handstand Hold" class="exercise-img">
+                        <div class="exercise-name">Handstand Hold</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Box Jump">
+                        <img src="img/box-jump.png" alt="Box Jump" class="exercise-img">
+                        <div class="exercise-name">Box Jump</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Tuck Jump">
+                        <img src="img/tuck-jump.png" alt="Tuck Jump" class="exercise-img">
+                        <div class="exercise-name">Tuck Jump</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Forward Lunge">
+                        <img src="img/forward-lunge.png" alt="Forward Lunge" class="exercise-img">
+                        <div class="exercise-name">Forward Lunge</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Reverse Lunge">
+                        <img src="img/reverse-lunge.png" alt="Reverse Lunge" class="exercise-img">
+                        <div class="exercise-name">Reverse Lunge</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Lateral Lunge">
+                        <img src="img/lateral-lunge.png" alt="Lateral Lunge" class="exercise-img">
+                        <div class="exercise-name">Lateral Lunge</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Split Squat">
+                        <img src="img/split-squat.png" alt="Split Squat" class="exercise-img">
+                        <div class="exercise-name">Split Squat</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Calf Raise">
+                        <img src="img/calf-raise.png" alt="Calf Raise" class="exercise-img">
+                        <div class="exercise-name">Calf Raise</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Donkey Kick">
+                        <img src="img/donkey-kick.png" alt="Donkey Kick" class="exercise-img">
+                        <div class="exercise-name">Donkey Kick</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Mountain Climber Twist">
+                        <img src="img/mountain-climber-twist.png" alt="Mountain Climber Twist" class="exercise-img">
+                        <div class="exercise-name">Mountain Climber Twist</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Bear Crawl">
+                        <img src="img/bear-crawl.png" alt="Bear Crawl" class="exercise-img">
+                        <div class="exercise-name">Bear Crawl</div>
+                    </div>
+                    
+                    <!-- Esercizi con Pesi -->
+                    <div class="exercise-card" data-exercise="Bicep Curl">
+                        <img src="img/bicep-curl.png" alt="Bicep Curl" class="exercise-img">
+                        <div class="exercise-name">Bicep Curl</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Hammer Curl">
+                        <img src="img/hammer-curl.png" alt="Hammer Curl" class="exercise-img">
+                        <div class="exercise-name">Hammer Curl</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Bicep Curl to Shoulder Press">
+                        <img src="img/bicep-curl-to-shoulder-press.png" alt="Bicep Curl to Shoulder Press" class="exercise-img">
+                        <div class="exercise-name">Bicep Curl to Shoulder Press</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Shoulder Press">
+                        <img src="img/shoulder-press.png" alt="Shoulder Press" class="exercise-img">
+                        <div class="exercise-name">Shoulder Press</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Lateral Raise">
+                        <img src="img/lateral-raise.png" alt="Lateral Raise" class="exercise-img">
+                        <div class="exercise-name">Lateral Raise</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Front Raise">
+                        <img src="img/front-raise.png" alt="Front Raise" class="exercise-img">
+                        <div class="exercise-name">Front Raise</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Bent Over Row">
+                        <img src="img/bent-over-row.png" alt="Bent Over Row" class="exercise-img">
+                        <div class="exercise-name">Bent Over Row</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Single Arm Row">
+                        <img src="img/single-arm-row.png" alt="Single Arm Row" class="exercise-img">
+                        <div class="exercise-name">Single Arm Row</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Upright Row">
+                        <img src="img/upright-row.png" alt="Upright Row" class="exercise-img">
+                        <div class="exercise-name">Upright Row</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Goblet Squat">
+                        <img src="img/goblet-squat.png" alt="Goblet Squat" class="exercise-img">
+                        <div class="exercise-name">Goblet Squat</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Dumbbell Squat">
+                        <img src="img/dumbbell-squat.png" alt="Dumbbell Squat" class="exercise-img">
+                        <div class="exercise-name">Dumbbell Squat</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Romanian Deadlift">
+                        <img src="img/romanian-deadlift.png" alt="Romanian Deadlift" class="exercise-img">
+                        <div class="exercise-name">Romanian Deadlift</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Weighted Lunge">
+                        <img src="img/weighted-lunge.png" alt="Weighted Lunge" class="exercise-img">
+                        <div class="exercise-name">Weighted Lunge</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Dumbbell Bench Press">
+                        <img src="img/dumbbell-bench-press.png" alt="Dumbbell Bench Press" class="exercise-img">
+                        <div class="exercise-name">Dumbbell Bench Press</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Chest Fly">
+                        <img src="img/chest-fly.png" alt="Chest Fly" class="exercise-img">
+                        <div class="exercise-name">Chest Fly</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Tricep Extension">
+                        <img src="img/tricep-extension.png" alt="Tricep Extension" class="exercise-img">
+                        <div class="exercise-name">Tricep Extension</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Tricep Kickback">
+                        <img src="img/tricep-kickback.png" alt="Tricep Kickback" class="exercise-img">
+                        <div class="exercise-name">Tricep Kickback</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Weighted Russian Twist">
+                        <img src="img/weighted-russian-twist.png" alt="Weighted Russian Twist" class="exercise-img">
+                        <div class="exercise-name">Weighted Russian Twist</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Weighted Crunch">
+                        <img src="img/weighted-crunch.png" alt="Weighted Crunch" class="exercise-img">
+                        <div class="exercise-name">Weighted Crunch</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Kettlebell Swing">
+                        <img src="img/kettlebell-swing.png" alt="Kettlebell Swing" class="exercise-img">
+                        <div class="exercise-name">Kettlebell Swing</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Kettlebell Clean">
+                        <img src="img/kettlebell-clean.png" alt="Kettlebell Clean" class="exercise-img">
+                        <div class="exercise-name">Kettlebell Clean</div>
+                    </div>
+                    
+                    <!-- Esercizi a Corpo Libero Avanzati -->
+                    <div class="exercise-card" data-exercise="Muscle Up">
+                        <img src="img/muscle-up.png" alt="Muscle Up" class="exercise-img">
+                        <div class="exercise-name">Muscle Up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Front Lever">
+                        <img src="img/front-lever.png" alt="Front Lever" class="exercise-img">
+                        <div class="exercise-name">Front Lever</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Back Lever">
+                        <img src="img/back-lever.png" alt="Back Lever" class="exercise-img">
+                        <div class="exercise-name">Back Lever</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Planche">
+                        <img src="img/planche.png" alt="Planche" class="exercise-img">
+                        <div class="exercise-name">Planche</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Handstand Push-up">
+                        <img src="img/handstand-push-up.png" alt="Handstand Push-up" class="exercise-img">
+                        <div class="exercise-name">Handstand Push-up</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="One Arm Push-up">
+                        <img src="img/one-arm-push-up.png" alt="One Arm Push-up" class="exercise-img">
+                        <div class="exercise-name">One Arm Push-up</div>
+                    </div>
+                    
+                    <!-- Esercizi di Stretching -->
+                    <div class="exercise-card" data-exercise="Child's Pose">
+                        <img src="img/childs-pose.png" alt="Child's Pose" class="exercise-img">
+                        <div class="exercise-name">Child's Pose</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Downward Dog">
+                        <img src="img/downward-dog.png" alt="Downward Dog" class="exercise-img">
+                        <div class="exercise-name">Downward Dog</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Cobra Stretch">
+                        <img src="img/cobra-stretch.png" alt="Cobra Stretch" class="exercise-img">
+                        <div class="exercise-name">Cobra Stretch</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Butterfly Stretch">
+                        <img src="img/butterfly-stretch.png" alt="Butterfly Stretch" class="exercise-img">
+                        <div class="exercise-name">Butterfly Stretch</div>
+                    </div>
+                    <div class="exercise-card" data-exercise="Pigeon Pose">
+                        <img src="img/pigeon-pose.png" alt="Pigeon Pose" class="exercise-img">
+                        <div class="exercise-name">Pigeon Pose</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+        <div class="workout-builder">
+            <h2 class="workout-title">Il Tuo Allenamento</h2>
+            <div class="workout-settings">
+                <div class="countdown-setting">
+                    <span class="countdown-label">Countdown iniziale (secondi):</span>
+                    <input type="number" class="countdown-input" value="3" min="1" max="10">
+                </div>
+            </div>
+            
+            <ul class="workout-list"></ul>
+            <button class="start-btn" disabled>Avvia l'allenamento</button>
+        </div>
+    </div>
+
+    <audio id="beepSound" src="beep.mp3"></audio>
+    
+    <!-- Nuovo bottone fisso con freccia -->
+    <button class="more-btn">
+        <div class="arrow"></div>
+    </button>
+    
+    <div class="timer-container">
+        <div class="timer-exercise">Esercizio</div>
+        <div class="timer-display">00:00</div>
+        <div class="timer-status">Preparati...</div>
+        <div class="next-up">Prossimo: -</div>
+        <div class="timer-controls">
+            <button class="timer-btn" id="pause-btn">Pausa</button>
+            <button class="timer-btn" id="skip-btn">Salta</button>
+            <button class="timer-btn" id="exit-btn">Esci</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const countdownInput = document.querySelector('.countdown-input');
+            const workoutList = document.querySelector('.workout-list');
+            const startBtn = document.querySelector('.start-btn');
+            const moreBtn = document.querySelector('.more-btn');
+            const arrow = document.querySelector('.arrow');
+            const moreExercises = document.querySelector('.more-exercises');
+            const container = document.querySelector('.container');
+            const timerContainer = document.querySelector('.timer-container');
+            const timerDisplay = document.querySelector('.timer-display');
+            const timerExercise = document.querySelector('.timer-exercise');
+            const timerStatus = document.querySelector('.timer-status');
+            const nextUp = document.querySelector('.next-up');
+            const pauseBtn = document.getElementById('pause-btn');
+            const skipBtn = document.getElementById('skip-btn');
+            const exitBtn = document.getElementById('exit-btn');
+            
+            let workout = [];
+            let currentExerciseIndex = -1;
+            let timerInterval;
+            let remainingTime = 0;
+            let isPaused = false;
+            let isRest = false;
+            
+            // Aggiunge gli esercizi alla coda
+            document.querySelectorAll('.exercise-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const exerciseName = this.getAttribute('data-exercise');
+                    addExerciseToWorkout(exerciseName);
+                });
+            });
+            
+            // Mostra o nasconde gli esercizi aggiuntivi
+            moreBtn.addEventListener('click', function() {
+        if (moreExercises.style.display === 'block') {
+            moreExercises.style.display = 'none';
+            arrow.classList.remove('down');
+        } else {
+            moreExercises.style.display = 'block';
+            arrow.classList.add('down');
+        }
+    });
+            
+            // Avvia l'allenamento
+            startBtn.addEventListener('click', startWorkout);
+            
+            // Controlli del timer
+            pauseBtn.addEventListener('click', togglePause);
+            skipBtn.addEventListener('click', skipExercise);
+            exitBtn.addEventListener('click', exitWorkout);
+            
+            // Funzione per aggiungere un esercizio alla coda di allenamento
+            function addExerciseToWorkout(exerciseName) {
+                const exerciseItem = {
+                    name: exerciseName,
+                    duration: 30,
+                    rest: 15
+                };
+                
+                workout.push(exerciseItem);
+                renderWorkoutList();
+                startBtn.disabled = workout.length === 0;
+            }
+            
+            // Funzione per rimuovere un esercizio dalla coda di allenamento
+            function removeExerciseFromWorkout(index) {
+                workout.splice(index, 1);
+                renderWorkoutList();
+                startBtn.disabled = workout.length === 0;
+            }
+            
+            // Funzione per aggiornare durata o riposo di un esercizio
+            function updateExerciseTime(index, type, value) {
+                workout[index][type] = parseInt(value) || 0;
+            }
+            
+            // Funzione per generare la lista degli esercizi dell'allenamento
+            function renderWorkoutList() {
+                workoutList.innerHTML = '';
+                
+                workout.forEach((exercise, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'workout-item';
+                    
+                    li.innerHTML = `
+                        <div class="workout-item-header">
+                            <span class="workout-item-name">${exercise.name}</span>
+                            <button class="remove-exercise">×</button>
+                        </div>
+                        <div class="workout-item-controls">
+                            <div class="time-control">
+                                <span class="time-label">Durata:</span>
+                                <input type="number" class="time-input duration-input" value="${exercise.duration}" min="1">
+                            </div>
+                            <div class="time-control">
+                                <span class="time-label">Recupero:</span>
+                                <input type="number" class="time-input rest-input" value="${exercise.rest}" min="0">
+                            </div>
+                        </div>
+                    `;
+                    
+                    const removeBtn = li.querySelector('.remove-exercise');
+                    removeBtn.addEventListener('click', () => removeExerciseFromWorkout(index));
+                    
+                    const durationInput = li.querySelector('.duration-input');
+                    durationInput.addEventListener('change', () => updateExerciseTime(index, 'duration', durationInput.value));
+                    
+                    const restInput = li.querySelector('.rest-input');
+                    restInput.addEventListener('change', () => updateExerciseTime(index, 'rest', restInput.value));
+                    
+                    workoutList.appendChild(li);
+                });
+            }
+            
+            // Funzione per avviare l'allenamento
+            function startWorkout() {
+                if (workout.length === 0) return;
+                
+                container.style.display = 'none';
+                timerContainer.style.display = 'flex';
+                
+                currentExerciseIndex = -1;
+                nextExercise();
+            }
+            
+            // Funzione per passare all'esercizio successivo
+            function nextExercise() {
+                currentExerciseIndex++;
+        
+        if (currentExerciseIndex >= workout.length) {
+            completeWorkout();
+            return;
+        }
+        
+        const exercise = workout[currentExerciseIndex];
+        
+        timerExercise.textContent = exercise.name;
+        timerStatus.textContent = 'Preparati...';
+        
+        if (currentExerciseIndex + 1 < workout.length) {
+            nextUp.textContent = `Prossimo: ${workout[currentExerciseIndex + 1].name}`;
+        } else {
+            nextUp.textContent = 'Ultimo esercizio!';
+        }
+
+        const beepSound = document.getElementById('beepSound');
+                
+                // Countdown di 3 secondi prima di iniziare
+                let countdown = parseInt(countdownInput.value) || 3;
+        timerDisplay.textContent = countdown < 10 ? `00:0${countdown}` : `00:${countdown}`;
+        
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                startExerciseTimer(exercise.duration);
+            } else {
+                timerDisplay.textContent = countdown < 10 ? `00:0${countdown}` : `00:${countdown}`;
+            }
+        }, 1000);
+    }
+    
+    // Validazione dell'input del countdown
+    countdownInput.addEventListener('change', function() {
+        let value = parseInt(this.value);
+        if (isNaN(value) || value < 1) {
+            this.value = 3;
+        } else if (value > 10) {
+            this.value = 10;
+        }
+    });
+            
+            // Funzione per avviare il timer dell'esercizio
+function startExerciseTimer(duration) {
+    isRest = false;
+    timerStatus.textContent = 'Esercizio in corso...';
+    remainingTime = duration;
+    updateTimerDisplay();
+    
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (!isPaused) {
+            remainingTime--;
+            
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                const beepSound = document.getElementById('beepSound');
+                beepSound.play(); // Riproduci il beep
+                const restTime = workout[currentExerciseIndex].rest;
+                
+                if (restTime > 0) {
+                    startRestTimer(restTime);
+                } else {
+                    nextExercise();
+                }
+            } else {
+                updateTimerDisplay();
+            }
+        }
+    }, 1000);
+}
+            
+            // Funzione per avviare il timer di riposo
+function startRestTimer(rest) {
+    isRest = true;
+    timerStatus.textContent = 'Recupero...';
+    remainingTime = rest;
+    updateTimerDisplay();
+    
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (!isPaused) {
+            remainingTime--;
+            
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                const beepSound = document.getElementById('beepSound');
+                beepSound.play(); // Riproduci il beep
+                nextExercise();
+            } else {
+                updateTimerDisplay();
+            }
+        }
+    }, 1000);
+}
+            
+            // Funzione per aggiornare il display del timer
+            function updateTimerDisplay() {
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Funzione per mettere in pausa o riprendere il timer
+            function togglePause() {
+                isPaused = !isPaused;
+                pauseBtn.textContent = isPaused ? 'Riprendi' : 'Pausa';
+                
+                if (isPaused) {
+                    timerStatus.textContent = 'In pausa';
+                } else {
+                    timerStatus.textContent = isRest ? 'Recupero...' : 'Esercizio in corso...';
+                }
+            }
+            
+            // Funzione per saltare l'esercizio corrente
+            function skipExercise() {
+                clearInterval(timerInterval);
+                
+                if (isRest) {
+                    nextExercise();
+                } else {
+                    const restTime = workout[currentExerciseIndex].rest;
+                    
+                    if (restTime > 0) {
+                        startRestTimer(restTime);
+                    } else {
+                        nextExercise();
+                    }
+                }
+            }
+            
+            // Funzione per uscire dall'allenamento
+            function exitWorkout() {
+                clearInterval(timerInterval);
+                timerContainer.style.display = 'none';
+                container.style.display = 'flex';
+                isPaused = false;
+            }
+            
+            // Funzione per completare l'allenamento
+            function completeWorkout() {
+                timerExercise.textContent = 'Allenamento Completato!';
+                timerDisplay.textContent = '00:00';
+                timerStatus.textContent = 'Ben fatto!';
+                nextUp.textContent = '';
+                
+                // Torna alla schermata principale dopo 3 secondi
+                setTimeout(() => {
+                    exitWorkout();
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
