@@ -1,0 +1,175 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f4f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Contenitore principale, scrollabile se necessario */
+.container {
+  width: 90%;
+  max-width: 400px;
+  max-height: 100vh;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Titolo sticky sempre visibile in alto */
+.container h1 {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding: 10px;
+  z-index: 1000;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Accordion Styles */
+.accordion {
+  padding: 10px;
+}
+
+.accordion-section + .accordion-section {
+  margin-top: 10px;
+}
+
+.accordion-header {
+  background-color: #eee;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 18px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.accordion-content {
+  display: none;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+}
+
+/* Stili per le sezioni interne */
+.settings, .presets, .queue, .rapidita {
+  margin-bottom: 20px;
+}
+
+.settings label, .queue-inputs label, .rapidita label {
+  display: block;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.settings input, .queue-inputs input, .rapidita input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  margin: 5px;
+}
+
+button:disabled {
+  background-color: #ccc;
+}
+
+.preset {
+  background-color: #2196F3;
+  font-size: 16px;
+}
+
+.preset:hover {
+  background-color: #1E88E5;
+}
+
+.queue {
+  text-align: left;
+}
+
+#addRound {
+  background-color: #FF9800;
+}
+
+#queueList {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+#queueList li {
+  margin: 5px 0;
+  background: #e3e3e3;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Timer Fisso in fondo */
+.fixed-timer {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  z-index: 1000;
+}
+
+/* Timer display e controlli */
+.timer-display {
+  text-align: center;
+}
+
+#time-left {
+  font-size: 50px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+#phase {
+  font-size: 24px;
+  color: #666;
+}
+
+.controls {
+  text-align: center;
+}
+
+/* Sezione Rapidità */
+.rapidita {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#rapidita-status {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #d9534f;
+  text-align: center;
+}

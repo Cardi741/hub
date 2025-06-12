@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Allenamento Intervallato</title>
+  <!-- CSS Integrato -->
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    
+    /* Contenitore principale, scrollabile se necessario */
+    .container {
+      width: 90%;
+      max-width: 400px;
+      max-height: 100vh;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    /* Titolo sticky sempre visibile in alto */
+    .container h1 {
+      position: sticky;
+      top: 0;
+      background-color: white;
+      padding: 10px;
+      z-index: 1000;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    /* Accordion Styles */
+    .accordion {
+      padding: 10px;
+    }
+    
+    .accordion-section + .accordion-section {
+      margin-top: 10px;
+    }
+    
+    .accordion-header {
+      background-color: #eee;
+      cursor: pointer;
+      padding: 10px;
+      font-size: 18px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    .accordion-content {
+      display: none;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 5px 5px;
+    }
+    
+    /* Stili per le sezioni interne */
+    .settings, .presets, .queue, .rapidita {
+      margin-bottom: 20px;
+    }
+    
+    .settings label, .queue-inputs label, .rapidita label {
+      display: block;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    
+    .settings input, .queue-inputs input, .rapidita input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 18px;
+      margin: 5px;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+    }
+    
+    .preset {
+      background-color: #2196F3;
+      font-size: 16px;
+    }
+    
+    .preset:hover {
+      background-color: #1E88E5;
+    }
+    
+    .queue {
+      text-align: left;
+    }
+    
+    #addRound {
+      background-color: #FF9800;
+    }
+    
+    #queueList {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+    
+    #queueList li {
+      margin: 5px 0;
+      background: #e3e3e3;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    
+    /* Timer Fisso in fondo */
+    .fixed-timer {
+      position: sticky;
+      bottom: 0;
+      background-color: white;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      z-index: 1000;
+    }
+    
+    /* Timer display e controlli */
+    .timer-display {
+      text-align: center;
+    }
+    
+    #time-left {
+      font-size: 50px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    
+    #phase {
+      font-size: 24px;
+      color: #666;
+    }
+    
+    .controls {
+      text-align: center;
+    }
+    
+    /* Sezione Rapidità */
+    .rapidita {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #rapidita-status {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #d9534f;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Titolo: sempre visibile in alto -->
+    <h1>Timer Allenamento Intervallato</h1>
+    
+    <!-- Sezione Accordion: contiene le tre macro aree -->
+    <div class="accordion">
+      
+      <!-- Sezione 1: Allenamento Intervallato e Pre-set -->
+      <div class="accordion-section">
+        <div class="accordion-header">Allenamento Intervallato e Pre-set</div>
+        <div class="accordion-content">
+          <!-- Impostazioni base -->
+          <div class="settings">
+            <label for="workTime">Tempo di lavoro (sec):</label>
+            <input type="number" id="workTime" value="30">
+            
+            <label for="restTime">Tempo di recupero (sec):</label>
+            <input type="number" id="restTime" value="15">
+            
+            <label for="rounds">Numero di round:</label>
+            <input type="number" id="rounds" value="5">
+            
+            <button id="saveSettings">Salva Allenamento</button>
+            <button id="loadSettings">Carica Allenamento</button>
+          </div>
+          
+          <!-- Pre-set -->
+          <div class="presets">
+            <h3>Seleziona un Allenamento Pre-set</h3>
+            <button class="preset" id="preset-hiit">HIIT (20s lavoro / 10s recupero / 8 round)</button>
+            <button class="preset" id="preset-tabata">Tabata (30s lavoro / 10s recupero / 8 round)</button>
+            <button class="preset" id="preset-pwm">PWM (40s lavoro / 20s recupero / 6 round)</button>
+            <button class="preset" id="preset-corsa">Corsa (20s veloce / 40s lenta / 20 round)</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sezione 2: Coda degli esercizi -->
+      <div class="accordion-section">
+        <div class="accordion-header">Coda degli esercizi</div>
+        <div class="accordion-content">
+          <div class="queue">
+            <h3>Coda degli esercizi</h3>
+            <div class="queue-inputs">
+              <label for="queue-workTime">Tempo Fase Lavoro (sec):</label>
+              <input type="number" id="queue-workTime" value="20">
+              
+              <label for="queue-restTime">Tempo Fase Recupero (sec):</label>
+              <input type="number" id="queue-restTime" value="10">
+              
+              <button id="addRound">Aggiungi Round</button>
+            </div>
+            <ul id="queueList"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
+    <button onclick="window.location.href='hub.html'" 
+            style="background: linear-gradient(45deg, #32CD32, #228B22); 
+                   color: white; border: none; padding: 10px 15px; 
+                   border-radius: 25px; cursor: pointer; font-weight: bold;
+                   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                   transition: all 0.3s ease;">
+        ⚽ HUB
+    </button>
+</div>
+      
+      <!-- Sezione 3: Esercizi di Rapidità -->
+      <div class="accordion-section">
+        <div class="accordion-header">Esercizi di Rapidità</div>
+        <div class="accordion-content">
+          <div class="rapidita">
+            <h3>Esercizio di Rapidità</h3>
+            <label for="minSeconds">Secondi Minimi:</label>
+            <input type="number" id="minSeconds" value="20">
+            <label for="maxSeconds">Secondi Massimi:</label>
+            <input type="number" id="maxSeconds" value="90">
+            <button id="startRapidita">Avvia Rapidità</button>
+            <div id="rapidita-status"></div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Timer Fisso: sempre visibile in fondo -->
+    <div class="fixed-timer">
+      <div class="timer-display">
+        <h2 id="phase">In attesa...</h2>
+        <div id="time-left">00:00</div>
+      </div>
+      <div class="controls">
+        <button id="startButton">Avvia</button>
+        <button id="pauseButton" disabled>Pausa</button>
+      </div>
+    </div>
+    
+    <!-- File audio per beep -->
+    <audio id="beep" src="beep.mp3" preload="auto"></audio>
+  </div>
+  
+  <!-- JavaScript Integrato -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Variabili globali per il timer e le impostazioni base
+      let workTime = 30;
+      let restTime = 15;
+      let rounds = 5;
+      let isRunning = false;
+      let currentRound = 0;
+      let timerInterval;
+      let timeLeft;
+      let isWorkPhase = true;
+      
+      // Variabile per la coda degli esercizi (es. playlist di round)
+      let exerciseQueue = [];
+      
+      // Elementi del DOM per il timer
+      const phaseDisplay = document.getElementById('phase');
+      const timeDisplay = document.getElementById('time-left');
+      const startButton = document.getElementById('startButton');
+      const pauseButton = document.getElementById('pauseButton');
+      const beep = document.getElementById('beep');
+      
+      // Funzioni per salvare/caricare le impostazioni con localStorage
+      function loadSettings() {
+        const savedWorkTime = localStorage.getItem('workTime');
+        const savedRestTime = localStorage.getItem('restTime');
+        const savedRounds = localStorage.getItem('rounds');
+        
+        if (savedWorkTime) workTime = parseInt(savedWorkTime);
+        if (savedRestTime) restTime = parseInt(savedRestTime);
+        if (savedRounds) rounds = parseInt(savedRounds);
+        
+        document.getElementById('workTime').value = workTime;
+        document.getElementById('restTime').value = restTime;
+        document.getElementById('rounds').value = rounds;
+      }
+      
+      function saveSettings() {
+        localStorage.setItem('workTime', workTime);
+        localStorage.setItem('restTime', restTime);
+        localStorage.setItem('rounds', rounds);
+      }
+      
+      // Pre-set di allenamenti
+      const presets = {
+        hiit: { workTime: 20, restTime: 10, rounds: 8 },
+        tabata: { workTime: 30, restTime: 10, rounds: 8 },
+        pwm: { workTime: 40, restTime: 20, rounds: 6 },
+        corsa: { workTime: 20, restTime: 40, rounds: 20 }
+      };
+      
+      function applyPreset(presetName) {
+        const preset = presets[presetName];
+        if (preset) {
+          document.getElementById('workTime').value = preset.workTime;
+          document.getElementById('restTime').value = preset.restTime;
+          document.getElementById('rounds').value = preset.rounds;
+          
+          workTime = preset.workTime;
+          restTime = preset.restTime;
+          rounds = preset.rounds;
+          saveSettings();
+        }
+      }
+      
+      // Associa i click ai pulsanti pre-set
+      document.getElementById('preset-hiit').addEventListener('click', () => applyPreset('hiit'));
+      document.getElementById('preset-tabata').addEventListener('click', () => applyPreset('tabata'));
+      document.getElementById('preset-pwm').addEventListener('click', () => applyPreset('pwm'));
+      document.getElementById('preset-corsa').addEventListener('click', () => applyPreset('corsa'));
+      
+      // Funzioni per la coda degli esercizi
+      function addRoundToQueue() {
+        const qWorkTime = parseInt(document.getElementById('queue-workTime').value);
+        const qRestTime = parseInt(document.getElementById('queue-restTime').value);
+        exerciseQueue.push({ workTime: qWorkTime, restTime: qRestTime });
+        updateQueueDisplay();
+      }
+      
+      function updateQueueDisplay() {
+        const queueList = document.getElementById('queueList');
+        queueList.innerHTML = "";
+        exerciseQueue.forEach((round, index) => {
+          const li = document.createElement('li');
+          li.textContent = `Round ${index + 1}: ${round.workTime}s lavoro, ${round.restTime}s recupero`;
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = "Rimuovi";
+          removeBtn.style.marginLeft = "10px";
+          removeBtn.addEventListener('click', () => removeRoundFromQueue(index));
+          li.appendChild(removeBtn);
+          queueList.appendChild(li);
+        });
+      }
+      
+      function removeRoundFromQueue(index) {
+        exerciseQueue.splice(index, 1);
+        updateQueueDisplay();
+      }
+      
+      document.getElementById('addRound').addEventListener('click', addRoundToQueue);
+      
+      // Funzione per aggiornare il display del timer (mm:ss)
+      function updateTimerDisplay(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        timeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      
+      /* MODALITÀ STANDARD (senza coda) */
+      function nextPhase() {
+        // Se abbiamo esaurito i round, termina l'allenamento
+        if (currentRound >= rounds) {
+          phaseDisplay.textContent = "Allenamento Completato!";
+          timeDisplay.textContent = "00:00";
+          clearInterval(timerInterval);
+          isRunning = false;
+          startButton.textContent = 'Avvia';
+          pauseButton.disabled = true;
+          return;
+        }
+        
+        timeLeft = isWorkPhase ? workTime : restTime;
+        phaseDisplay.textContent = isWorkPhase ? "Lavoro!" : "Recupero!";
+        updateTimerDisplay(timeLeft);
+        
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateTimerDisplay(timeLeft);
+    
+          if (timeLeft <= 0) {
+            beep.play();
+            isWorkPhase = !isWorkPhase;
+            if (isWorkPhase) currentRound++;
+            clearInterval(timerInterval);
+            nextPhase();
+          }
+        }, 1000);
+      }
+      
+      /* MODALITÀ QUEUE: utilizza i round della coda degli esercizi */
+      function nextPhaseQueue() {
+        if (currentRound >= exerciseQueue.length) {
+          phaseDisplay.textContent = "Allenamento Completato!";
+          timeDisplay.textContent = "00:00";
+          clearInterval(timerInterval);
+          isRunning = false;
+          startButton.textContent = 'Avvia';
+          pauseButton.disabled = true;
+          return;
+        }
+        
+        const currentData = exerciseQueue[currentRound];
+        timeLeft = isWorkPhase ? currentData.workTime : currentData.restTime;
+        phaseDisplay.textContent = isWorkPhase
+          ? `Round ${currentRound + 1} - Lavoro!`
+          : `Round ${currentRound + 1} - Recupero!`;
+        updateTimerDisplay(timeLeft);
+        
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateTimerDisplay(timeLeft);
+    
+          if (timeLeft <= 0) {
+            beep.play();
+            isWorkPhase = !isWorkPhase;
+            if (isWorkPhase) currentRound++;
+            clearInterval(timerInterval);
+            nextPhaseQueue();
+          }
+        }, 1000);
+      }
+      
+      // Funzione per avviare/fermare il timer
+      function startTimer() {
+        if (isRunning) {
+          clearInterval(timerInterval);
+          isRunning = false;
+          startButton.textContent = 'Avvia';
+          pauseButton.disabled = true;
+        } else {
+          isRunning = true;
+          currentRound = 0;
+          isWorkPhase = true;
+          startButton.textContent = 'Ferma';
+          pauseButton.disabled = false;
+    
+          // Se esiste almeno un round in coda, usa la modalità Queue
+          if (exerciseQueue.length > 0) {
+            nextPhaseQueue();
+          } else {
+            nextPhase();
+          }
+        }
+      }
+      
+      startButton.addEventListener('click', startTimer);
+      pauseButton.addEventListener('click', startTimer);
+      
+      document.getElementById('saveSettings').addEventListener('click', () => {
+        workTime = parseInt(document.getElementById('workTime').value);
+        restTime = parseInt(document.getElementById('restTime').value);
+        rounds = parseInt(document.getElementById('rounds').value);
+        saveSettings();
+      });
+      
+      document.getElementById('loadSettings').addEventListener('click', loadSettings);
+      
+      // Funzione per l'Esercizio di Rapidità
+      function startRapidita() {
+        const minSec = parseInt(document.getElementById('minSeconds').value);
+        const maxSec = parseInt(document.getElementById('maxSeconds').value);
+        const statusEl = document.getElementById('rapidita-status');
+        
+        if (isNaN(minSec) || isNaN(maxSec) || minSec < 0 || maxSec < minSec) {
+          statusEl.textContent = "Controlla i valori inseriti";
+          return;
+        }
+        statusEl.textContent = "";
+        
+        // Genera un tempo casuale nell'intervallo
+        const randomDelay = Math.floor(Math.random() * (maxSec - minSec + 1)) + minSec;
+        
+        // Countdown per l'esercizio di rapidità
+        let remaining = randomDelay;
+        statusEl.textContent = `Aspetta ${remaining} secondi...`;
+        
+        const interval = setInterval(() => {
+          remaining--;
+          statusEl.textContent = `Aspetta ${remaining} secondi...`;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            beep.play();
+            statusEl.textContent = "Beep! Partito!";
+          }
+        }, 1000);
+      }
+      
+      document.getElementById('startRapidita').addEventListener('click', startRapidita);
+      
+      // Inizializzazione al caricamento della pagina
+      loadSettings();
+      
+      // Comportamento dell'Accordion: cliccando sull'intestazione, espande o contrae la sezione successiva
+      const headers = document.querySelectorAll('.accordion-header');
+      headers.forEach(header => {
+        header.addEventListener('click', () => {
+          const content = header.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      });
+      
+    });
+  </script>
+</body>
+</html>

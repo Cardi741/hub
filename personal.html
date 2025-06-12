@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrainingPro - Allenamenti Calcistici</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #3498db;
+            background-color: #f8f9fa;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-item.checked {
+            border-color: #27ae60;
+            background-color: #e8f5e8;
+        }
+
+        .calendar-section {
+            margin-top: 30px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .day-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .day-cell.normal {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        .day-cell.difficult {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+
+        .day-cell.delicate {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .day-number {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .day-status {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .generate-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .program-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+
+        .week-header {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .week-header:hover {
+            transform: translateX(5px);
+        }
+
+        .week-content {
+            margin-bottom: 30px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .week-content.collapsed {
+            max-height: 0;
+            margin-bottom: 0;
+        }
+
+        .day-training {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .day-training.difficult {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+
+        .day-training.delicate {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .day-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .training-section {
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .exercise-list {
+            margin-left: 15px;
+        }
+
+        .exercise-item {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading::after {
+            content: '⚽';
+            display: inline-block;
+            animation: bounce 1s infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ TrainingPro</h1>
+            <p>Sistema Professionale per Allenamenti Calcistici</p>
+        </div>
+
+        <div class="form-container">
+            <form id="trainingForm">
+                <div class="form-group">
+                    <label for="duration">Durata Programma</label>
+                    <select id="duration" required>
+                        <option value="">Seleziona durata</option>
+                        <option value="1week">1 Settimana</option>
+                        <option value="2weeks">2 Settimane</option>
+                        <option value="3weeks">3 Settimane</option>
+                        <option value="4weeks">4 Settimane</option>
+                        <option value="1month">1 Mese</option>
+                        <option value="6weeks">6 Settimane</option>
+                        <option value="8weeks">8 Settimane</option>
+                        <option value="2months">2 Mesi</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="weeklyDays">Giorni di Allenamento a Settimana</label>
+                    <select id="weeklyDays" required>
+                        <option value="">Seleziona giorni</option>
+                        <option value="1">1 giorno</option>
+                        <option value="2">2 giorni</option>
+                        <option value="3">3 giorni</option>
+                        <option value="4">4 giorni</option>
+                        <option value="5">5 giorni</option>
+                        <option value="6">6 giorni</option>
+                        <option value="7">7 giorni</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="position">Ruolo del Giocatore</label>
+                    <select id="position" required>
+                        <option value="">Seleziona ruolo</option>
+                        <option value="goalkeeper">Portiere</option>
+                        <option value="fullback">Terzino</option>
+                        <option value="centerback">Difensore Centrale</option>
+                        <option value="midfielder">Centrocampista</option>
+                        <option value="winger">Ala</option>
+                        <option value="striker">Punta</option>
+                        <option value="playmaker">Mediano/Regista</option>
+                    </select>
+                </div>
+
+                <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
+    <button onclick="window.location.href='hub.html'" 
+            style="background: linear-gradient(45deg, #32CD32, #228B22); 
+                   color: white; border: none; padding: 10px 15px; 
+                   border-radius: 25px; cursor: pointer; font-weight: bold;
+                   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                   transition: all 0.3s ease;">
+        ⚽ HUB
+    </button>
+</div>
+
+                <div class="form-group">
+                    <label for="level">Livello di Esperienza</label>
+                    <select id="level" required>
+                        <option value="">Seleziona livello</option>
+                        <option value="beginner">Principiante</option>
+                        <option value="intermediate">Intermedio</option>
+                        <option value="advanced">Avanzato</option>
+                        <option value="professional">Professionistico</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Attrezzatura Disponibile</label>
+                    <div class="equipment-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="bodyweight" value="bodyweight" checked>
+                            <label for="bodyweight">Corpo Libero</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="resistance" value="resistance">
+                            <label for="resistance">Elastici</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="weights" value="weights">
+                            <label for="weights">Manubri</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="season">Periodo della Stagione</label>
+                    <select id="season" required>
+                        <option value="">Seleziona periodo</option>
+                        <option value="preseason">Pre-Season (Preparazione)</option>
+                        <option value="inseason">In-Season (Stagione)</option>
+                        <option value="offseason">Off-Season (Pausa)</option>
+                    </select>
+                </div>
+
+                <div class="calendar-section">
+                    <label>Imposta Tipo di Giorni (clicca per cambiare)</label>
+                    <div id="calendarGrid" class="calendar-grid"></div>
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        <span style="color: #495057;">⚪ Normale</span> | 
+                        <span style="color: #856404;">🟡 Difficile (allenamento leggero)</span> | 
+                        <span style="color: #721c24;">🔴 Delicato (riposo/recupero)</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="generate-btn">
+                    🚀 Genera Programma di Allenamento
+                </button>
+            </form>
+        </div>
+
+        <div id="programContainer" class="program-container" style="display: none;"></div>
+    </div>
+
+    <script>
+        class FootballTrainingGenerator {
+            constructor() {
+                this.form = document.getElementById('trainingForm');
+                this.calendarGrid = document.getElementById('calendarGrid');
+                this.programContainer = document.getElementById('programContainer');
+                this.dayStates = {};
+                this.totalDays = 0;
+                
+                this.initializeEventListeners();
+                this.initializeEquipmentCheckboxes();
+            }
+
+            initializeEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                document.getElementById('duration').addEventListener('change', () => this.updateCalendar());
+                document.getElementById('weeklyDays').addEventListener('change', () => this.updateCalendar());
+            }
+
+            initializeEquipmentCheckboxes() {
+                const checkboxItems = document.querySelectorAll('.checkbox-item');
+                checkboxItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    
+                    item.addEventListener('click', (e) => {
+                        if (e.target.type !== 'checkbox') {
+                            checkbox.checked = !checkbox.checked;
+                        }
+                        this.updateCheckboxStyle(item, checkbox.checked);
+                    });
+                    
+                    checkbox.addEventListener('change', () => {
+                        this.updateCheckboxStyle(item, checkbox.checked);
+                    });
+                    
+                    this.updateCheckboxStyle(item, checkbox.checked);
+                });
+            }
+
+            updateCheckboxStyle(item, checked) {
+                if (checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            }
+
+            updateCalendar() {
+                const duration = document.getElementById('duration').value;
+                const weeklyDays = parseInt(document.getElementById('weeklyDays').value);
+                
+                if (!duration || !weeklyDays) {
+                    this.calendarGrid.innerHTML = '';
+                    return;
+                }
+
+                const weeks = this.getDurationInWeeks(duration);
+                this.totalDays = weeks * weeklyDays;
+                
+                this.calendarGrid.innerHTML = '';
+                this.dayStates = {};
+                
+                for (let i = 1; i <= this.totalDays; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell normal';
+                    dayCell.innerHTML = `
+                        <div class="day-number">${i}</div>
+                        <div class="day-status">Normale</div>
+                    `;
+                    
+                    dayCell.addEventListener('click', () => this.cycleDayState(i, dayCell));
+                    this.calendarGrid.appendChild(dayCell);
+                    this.dayStates[i] = 'normal';
+                }
+            }
+
+            getDurationInWeeks(duration) {
+                const mapping = {
+                    '1week': 1,
+                    '2weeks': 2,
+                    '3weeks': 3,
+                    '4weeks': 4,
+                    '1month': 4,
+                    '6weeks': 6,
+                    '8weeks': 8,
+                    '2months': 8
+                };
+                return mapping[duration] || 1;
+            }
+
+            cycleDayState(dayNumber, dayCell) {
+                const currentState = this.dayStates[dayNumber];
+                let newState, newClass, newText;
+                
+                switch (currentState) {
+                    case 'normal':
+                        newState = 'difficult';
+                        newClass = 'difficult';
+                        newText = 'Difficile';
+                        break;
+                    case 'difficult':
+                        newState = 'delicate';
+                        newClass = 'delicate';
+                        newText = 'Delicato';
+                        break;
+                    case 'delicate':
+                        newState = 'normal';
+                        newClass = 'normal';
+                        newText = 'Normale';
+                        break;
+                }
+                
+                this.dayStates[dayNumber] = newState;
+                dayCell.className = `day-cell ${newClass}`;
+                dayCell.querySelector('.day-status').textContent = newText;
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this.form);
+                const params = {
+                    duration: formData.get('duration') || document.getElementById('duration').value,
+                    weeklyDays: parseInt(document.getElementById('weeklyDays').value),
+                    position: formData.get('position') || document.getElementById('position').value,
+                    level: formData.get('level') || document.getElementById('level').value,
+                    season: formData.get('season') || document.getElementById('season').value,
+                    equipment: this.getSelectedEquipment(),
+                    dayStates: this.dayStates
+                };
+                
+                if (!this.validateForm(params)) return;
+                
+                this.showLoading();
+                
+                // Simulate processing time for better UX
+                setTimeout(() => {
+                    const program = this.generateTrainingProgram(params);
+                    this.displayProgram(program);
+                }, 1500);
+            }
+
+            validateForm(params) {
+                if (!params.duration || !params.weeklyDays || !params.position || 
+                    !params.level || !params.season) {
+                    alert('Per favore, compila tutti i campi obbligatori.');
+                    return false;
+                }
+                
+                if (params.equipment.length === 0) {
+                    alert('Seleziona almeno un tipo di attrezzatura.');
+                    return false;
+                }
+                
+                return true;
+            }
+
+            getSelectedEquipment() {
+                return Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(checkbox => checkbox.value);
+            }
+
+            showLoading() {
+                this.programContainer.style.display = 'block';
+                this.programContainer.innerHTML = '<div class="loading">Generazione programma in corso...</div>';
+                this.programContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            generateTrainingProgram(params) {
+                const weeks = this.getDurationInWeeks(params.duration);
+                const program = [];
+                
+                for (let week = 1; week <= weeks; week++) {
+                    const weekData = {
+                        week: week,
+                        days: []
+                    };
+                    
+                    for (let day = 1; day <= params.weeklyDays; day++) {
+                        const globalDay = (week - 1) * params.weeklyDays + day;
+                        const dayState = this.dayStates[globalDay] || 'normal';
+                        
+                        const dayTraining = this.generateDayTraining(
+                            day, 
+                            params, 
+                            dayState,
+                            week,
+                            params.weeklyDays
+                        );
+                        
+                        weekData.days.push({
+                            day: day,
+                            globalDay: globalDay,
+                            state: dayState,
+                            training: dayTraining
+                        });
+                    }
+                    
+                    program.push(weekData);
+                }
+                
+                return program;
+            }
+
+            generateDayTraining(day, params, dayState, week, weeklyDays) {
+                const training = {
+                    technical: this.generateTechnicalTraining(params, dayState),
+                    physical: this.generatePhysicalTraining(day, params, dayState, weeklyDays),
+                    speed: this.generateSpeedTraining(day, params, dayState, weeklyDays)
+                };
+
+                // Adjust intensity based on day state
+                if (dayState === 'difficult') {
+                    training.intensity = 'Moderata (adattata per impegni)';
+                    training.note = 'Allenamento alleggerito per permettere recupero prima dell\'impegno';
+                } else if (dayState === 'delicate') {
+                    training.intensity = 'Recupero Attivo';
+                    training.note = 'Giorno di recupero/preparazione partita - solo stretching e mobilità';
+                    training.physical = this.generateRecoveryTraining();
+                    training.speed = null;
+                } else {
+                    training.intensity = this.getIntensityByWeek(week, params.season);
+                }
+
+                return training;
+            }
+
+            generateTechnicalTraining(params, dayState) {
+                const baseExercises = {
+                    goalkeeper: [
+                        'Prese su tiri bassi e alti (15 min)',
+                        'Uscite su cross e palle aeree (10 min)',
+                        'Rilanci con i piedi e con le mani (10 min)',
+                        'Riflessi e coordinazione (10 min)'
+                    ],
+                    fullback: [
+                        'Cross dal fondo (15 min)',
+                        'Sovrapposizioni e 1vs1 (15 min)',
+                        'Passaggi corti e cambi gioco (10 min)',
+                        'Difesa posizionale (10 min)'
+                    ],
+                    centerback: [
+                        'Colpi di testa su cross (15 min)',
+                        'Passaggi lunghi di costruzione (15 min)',
+                        'Marcatura e anticipo (10 min)',
+                        'Comunicazione difensiva (10 min)'
+                    ],
+                    midfielder: [
+                        'Controllo e passaggio sotto pressione (15 min)',
+                        'Inserimenti in area (10 min)',
+                        'Transizioni difesa-attacco (15 min)',
+                        'Tiro da fuori area (10 min)'
+                    ],
+                    winger: [
+                        'Dribbling e 1vs1 (20 min)',
+                        'Cross in corsa (15 min)',
+                        'Rientro in fase difensiva (10 min)',
+                        'Finalizzazione dal limite (5 min)'
+                    ],
+                    striker: [
+                        'Finalizzazione da diverse angolazioni (20 min)',
+                        'Controllo e tiro in area (15 min)',
+                        'Movimenti senza palla (10 min)',
+                        'Sponde e assist (5 min)'
+                    ],
+                    playmaker: [
+                        'Passaggi di precisione (20 min)',
+                        'Visione di gioco e smarcamento (15 min)',
+                        'Controllo sotto pressione (10 min)',
+                        'Punizioni e calci piazzati (5 min)'
+                    ]
+                };
+
+                let exercises = [...baseExercises[params.position]];
+                
+                if (dayState === 'difficult') {
+                    exercises = exercises.map(ex => ex.replace(/\d+/, (match) => Math.max(5, parseInt(match) - 5)));
+                }
+
+                return {
+                    title: 'Allenamento Tecnico',
+                    exercises: exercises,
+                    duration: dayState === 'difficult' ? '35 min' : '50 min'
+                };
+            }
+
+            generatePhysicalTraining(day, params, dayState, weeklyDays) {
+                if (dayState === 'delicate') {
+                    return this.generateRecoveryTraining();
+                }
+
+                const muscleGroups = [
+                    { name: 'Gambe & Core', exercises: this.getLegsCoreExercises(params.equipment, params.level) },
+                    { name: 'Petto & Spalle', exercises: this.getChestShouldersExercises(params.equipment, params.level) },
+                    { name: 'Schiena & Bicipiti', exercises: this.getBackBicepsExercises(params.equipment, params.level) },
+                    { name: 'Tricipiti & Avambracci', exercises: this.getTricepsForearmsExercises(params.equipment, params.level) },
+                    { name: 'Core', exercises: this.getCoreExercises(params.level) }
+                ];
+
+                let targetGroup;
+                if (weeklyDays <= 2) {
+                    targetGroup = day === 1 ? muscleGroups[0] : muscleGroups[1];
+                } else if (weeklyDays <= 4) {
+                    const rotation = [0, 1, 2, 4];
+                    targetGroup = muscleGroups[rotation[day - 1] || 0];
+                } else {
+                    const rotation = [0, 1, 4, 2, 3];
+                    targetGroup = muscleGroups[rotation[day - 1] || 0];
+                }
+
+                const intensity = dayState === 'difficult' ? 0.7 : 1.0;
+                const adjustedExercises = targetGroup.exercises.map(ex => {
+                    if (dayState === 'difficult') {
+                        return ex.replace(/(\d+)(-\d+)?/g, (match, p1, p2) => {
+                            const newVal = Math.ceil(parseInt(p1) * intensity);
+                            return p2 ? `${newVal}${p2}` : newVal.toString();
+                        });
+                    }
+                    return ex;
+                });
+
+                return {
+                    title: `Allenamento Fisico - ${targetGroup.name}`,
+                    exercises: adjustedExercises,
+                    duration: dayState === 'difficult' ? '20 min' : '30 min'
+                };
+            }
+
+            generateSpeedTraining(day, params, dayState, weeklyDays) {
+                if (dayState === 'delicate') return null;
+
+                const speedTypes = ['Scatti', 'Resistenza', 'Agilità', 'Reattività'];
+                const speedType = speedTypes[day % speedTypes.length];
+
+                const exercises = this.getSpeedExercises(speedType, params.level, params.position);
+                const intensity = dayState === 'difficult' ? 0.8 : 1.0;
+                
+                const adjustedExercises = exercises.map(ex => {
+                    if (dayState === 'difficult') {
+                        return ex.replace(/(\d+)/g, (match, p1) => Math.ceil(parseInt(p1) * intensity).toString());
+                    }
+                    return ex;
+                });
+
+                return {
+                    title: `Allenamento Velocità - ${speedType}`,
+                    exercises: adjustedExercises,
+                    duration: dayState === 'difficult' ? '15 min' : '20 min'
+                };
+            }
+
+            generateRecoveryTraining() {
+                return {
+                    title: 'Recupero Attivo',
+                    exercises: [
+                        'Stretching dinamico (10 min)',
+                        'Mobilità articolare (8 min)',
+                        'Respirazione e rilassamento (5 min)',
+                        'Camminata leggera (7 min)'
+                    ],
+                    duration: '30 min'
+                };
+            }
+
+            getLegsCoreExercises(equipment, level) {
+                const base = [
+                    'Squat 3x12-15',
+                    'Affondi alternati 3x10 per gamba',
+                    'Calf raises 3x15-20',
+                    'Plank 3x30-60sec',
+                    'Russian twists 3x20',
+                    'Mountain climbers 3x15'
+                ];
+
+                if (equipment.includes('weights')) {
+                    base.push('Squat con manubri 3x10-12', 'Stacchi rumeni 3x8-10');
+                }
+
+                if (equipment.includes('resistance')) {
+                    base.push('Squat con elastico 3x12', 'Lateral walks 3x10 per lato');
+                }
+
+                return level === 'professional' ? base.map(ex => ex.replace(/3x/, '4x')) : base;
+            }
+
+            getChestShouldersExercises(equipment, level) {
+                const base = [
+                    'Flessioni 3x8-12',
+                    'Pike push-ups 3x6-10',
+                    'Tricep dips 3x8-12',
+                    'Plank to downward dog 3x10'
+                ];
+
+                if (equipment.includes('weights')) {
+                    base.push('Chest press con manubri 3x10-12', 'Shoulder press 3x8-10');
+                }
+
+                if (equipment.includes('resistance')) {
+                    base.push('Chest fly con elastico 3x12', 'Lateral raises con elastico 3x10');
+                }
+
+                return level === 'professional' ? base.map(ex => ex.replace(/3x/, '4x')) : base;
+            }
+
+            getBackBicepsExercises(equipment, level) {
+                const base = [
+                    'Superman 3x12-15',
+                    'Reverse plank 3x20-30sec',
+                    'Bird dog 3x10 per lato',
+                    'Wall sit 3x30-45sec'
+                ];
+
+                if (equipment.includes('weights')) {
+                    base.push('Bent-over row 3x10-12', 'Bicep curls 3x12-15');
+                }
+
+                if (equipment.includes('resistance')) {
+                    base.push('Rowing con elastico 3x12', 'Bicep curls con elastico 3x15');
+                }
+
+                return level === 'professional' ? base.map(ex => ex.replace(/3x/, '4x')) : base;
+            }
+
+            getTricepsForearmsExercises(equipment, level) {
+                const base = [
+                    'Diamond push-ups 3x6-10',
+                    'Tricep dips 3x8-12',
+                    'Plank up-downs 3x8-10',
+                    'Wrist curls 3x15-20'
+                ];
+
+                if (equipment.includes('weights')) {
+                    base.push('Overhead tricep extension 3x10-12', 'Wrist curls con manubri 3x15');
+                }
+
+                if (equipment.includes('resistance')) {
+                    base.push('Tricep extensions con elastico 3x12', 'Wrist extensions con elastico 3x15');
+                }
+
+                return level === 'professional' ? base.map(ex => ex.replace(/3x/, '4x')) : base;
+            }
+
+            getCoreExercises(level) {
+                const base = [
+                    'Plank 3x30-60sec',
+                    'Side plank 3x20-30sec per lato',
+                    'Dead bug 3x10 per lato',
+                    'Bicycle crunches 3x20',
+                    'Leg raises 3x10-12',
+                    'Russian twists 3x20'
+                ];
+
+                return level === 'professional' ? base.map(ex => ex.replace(/3x/, '4x')) : base;
+            }
+
+            getSpeedExercises(type, level, position) {
+                const exercises = {
+                    'Scatti': [
+                        'Sprint 20m x 6 ripetizioni',
+                        'Accelerazioni 15m x 8 ripetizioni',
+                        'Scatti navetta 10-15-20m x 4 serie',
+                        'Partenze da fermo x 6'
+                    ],
+                    'Resistenza': [
+                        'Corsa intervallata 30sec on/30sec off x 10',
+                        'Fartlek 20 minuti',
+                        'Corsa continua media intensità 15-25 min',
+                        'Interval training 400m x 4'
+                    ],
+                    'Agilità': [
+                        'Slalom tra coni x 8 ripetizioni',
+                        'Scala di agilità 6 varianti x 3',
+                        'Cambi di direzione 90° x 10',
+                        'Zig-zag run x 6 ripetizioni'
+                    ],
+                    'Reattività': [
+                        'Reazione a segnali visivi x 10',
+                        'Stop and go x 8 ripetizioni',
+                        'Reazione a palla lanciata x 12',
+                        'Sprint reattivi x 6'
+                    ]
+                };
+
+                let baseExercises = [...exercises[type]];
+
+                // Adjust for position
+                if (position === 'goalkeeper') {
+                    baseExercises = baseExercises.map(ex => ex.replace(/x \d+/, 'x 4'));
+                } else if (position === 'striker' || position === 'winger') {
+                    baseExercises = baseExercises.map(ex => ex.replace(/x (\d+)/, (match, p1) => `x ${parseInt(p1) + 2}`));
+                }
+
+                // Adjust for level
+                if (level === 'professional') {
+                    baseExercises = baseExercises.map(ex => ex.replace(/x (\d+)/, (match, p1) => `x ${parseInt(p1) + 2}`));
+                } else if (level === 'beginner') {
+                    baseExercises = baseExercises.map(ex => ex.replace(/x (\d+)/, (match, p1) => `x ${Math.max(3, parseInt(p1) - 2)}`));
+                }
+
+                return baseExercises;
+            }
+
+            getIntensityByWeek(week, season) {
+                if (season === 'preseason') {
+                    if (week <= 2) return 'Alta - Costruzione base';
+                    if (week <= 4) return 'Molto Alta - Intensificazione';
+                    return 'Alta - Affinamento';
+                } else if (season === 'inseason') {
+                    return 'Moderata-Alta - Mantenimento';
+                } else {
+                    return 'Bassa-Moderata - Recupero attivo';
+                }
+            }
+
+            displayProgram(program) {
+                let html = '<h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">🏆 Il Tuo Programma di Allenamento Personalizzato</h2>';
+                
+                program.forEach((week, index) => {
+                    const weekId = `week-${index}`;
+                    html += `
+                        <div class="week-header" onclick="toggleWeek('${weekId}')">
+                            <h3>Settimana ${week.week}</h3>
+                            <span class="chevron" id="chevron-${weekId}">▼</span>
+                        </div>
+                        <div class="week-content" id="${weekId}">
+                    `;
+                    
+                    week.days.forEach(dayData => {
+                        const dayClass = dayData.state !== 'normal' ? ` ${dayData.state}` : '';
+                        html += `
+                            <div class="day-training${dayClass}">
+                                <div class="day-title">
+                                    Giorno ${dayData.globalDay} - ${this.getDayStateText(dayData.state)}
+                                    ${dayData.training.intensity ? `<span style="font-size: 0.9rem; color: #7f8c8d;">(${dayData.training.intensity})</span>` : ''}
+                                </div>
+                        `;
+                        
+                        if (dayData.training.note) {
+                            html += `<div style="background: #e8f4f8; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-style: italic; color: #2c3e50;"><strong>Nota:</strong> ${dayData.training.note}</div>`;
+                        }
+                        
+                        // Technical training
+                        if (dayData.training.technical) {
+                            html += this.renderTrainingSection(dayData.training.technical);
+                        }
+                        
+                        // Physical training
+                        if (dayData.training.physical) {
+                            html += this.renderTrainingSection(dayData.training.physical);
+                        }
+                        
+                        // Speed training
+                        if (dayData.training.speed) {
+                            html += this.renderTrainingSection(dayData.training.speed);
+                        }
+                        
+                        html += '</div>';
+                    });
+                    
+                    html += '</div>';
+                });
+                
+                html += `
+                    <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; color: white;">
+    <h3 style="text-align: center; margin-bottom: 25px; font-size: 1.5rem;">🏆 I Segreti dei Campioni - Guida al Successo</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
+            <h4 style="color: #ffd700; margin-bottom: 12px;">🎯 ALLENAMENTO</h4>
+            <div style="font-size: 0.9rem; line-height: 1.5;">
+                • Riscaldati sempre 10-15 minuti prima<br>
+                • Qualità del movimento > Quantità<br>
+                • Registra progressi quotidiani<br>
+                • Costanza anche nei giorni difficili
+            </div>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
+            <h4 style="color: #ff6b6b; margin-bottom: 12px;">🍎 NUTRIZIONE</h4>
+            <div style="font-size: 0.9rem; line-height: 1.5;">
+                • Carboidrati 2-3h prima dell'allenamento<br>
+                • Proteine entro 30min dopo<br>
+                • 2-3 litri d'acqua al giorno<br>
+                • Evita cibi processati e zuccheri
+            </div>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
+            <h4 style="color: #4ecdc4; margin-bottom: 12px;">😴 RECUPERO</h4>
+            <div style="font-size: 0.9rem; line-height: 1.5;">
+                • Dormi 8-9 ore per crescita muscolare<br>
+                • Stretching dopo ogni allenamento<br>
+                • 1-2 giorni riposo completo/settimana<br>
+                • Dolore = stop, affaticamento = recupero
+            </div>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
+            <h4 style="color: #a8e6cf; margin-bottom: 12px;">🧠 MENTALE</h4>
+            <div style="font-size: 0.9rem; line-height: 1.5;">
+                • Visualizza obiettivi prima di iniziare<br>
+                • Celebra piccoli progressi quotidiani<br>
+                • Confrontati con te stesso di ieri<br>
+                • Mentalità vincente si allena come i muscoli
+            </div>
+        </div>
+    </div>
+</div>
+                `;
+                
+                this.programContainer.innerHTML = html;
+                
+                // Add toggle functionality
+                window.toggleWeek = (weekId) => {
+                    const content = document.getElementById(weekId);
+                    const chevron = document.getElementById(`chevron-${weekId}`);
+                    
+                    if (content.classList.contains('collapsed')) {
+                        content.classList.remove('collapsed');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        chevron.classList.remove('rotated');
+                    } else {
+                        content.classList.add('collapsed');
+                        content.style.maxHeight = '0';
+                        chevron.classList.add('rotated');
+                    }
+                };
+            }
+
+            renderTrainingSection(section) {
+                return `
+                    <div class="training-section">
+                        <div class="section-title">${section.title} (${section.duration})</div>
+                        <div class="exercise-list">
+                            ${section.exercises.map(exercise => `<div class="exercise-item">• ${exercise}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            getDayStateText(state) {
+                const texts = {
+                    'normal': 'Allenamento Normale',
+                    'difficult': 'Allenamento Adattato',
+                    'delicate': 'Recupero Attivo'
+                };
+                return texts[state] || 'Allenamento Normale';
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new FootballTrainingGenerator();
+        });
+    </script>
+</body>
+</html>
